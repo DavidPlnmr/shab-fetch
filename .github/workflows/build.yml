@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.6'  # Remplacez par la version Python requise
+          python-version: '3.11'  # Remplacez par la version Python requise
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -42,7 +42,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9.6'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install pyinstaller
