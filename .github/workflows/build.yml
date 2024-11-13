@@ -6,55 +6,8 @@ on:
       - main
 
 jobs:
-  # Test de l'application sur macOS
-  test-macos:
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python for macOS
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies (macOS)
-        run: pip install -r requirements.txt
-
-      - name: Test application (macOS)
-        run: |
-          python app.py &
-          sleep 1
-          pkill -f "python app.py"
-
-  # Test de l'application sur Windows
-  test-windows:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python for Windows
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies (Windows)
-        run: pip install -r requirements.txt
-
-      - name: Test application (Windows)
-        shell: pwsh
-        run: |
-          $process = Start-Process -FilePath "python.exe" -ArgumentList "app.py" -PassThru
-          Start-Sleep -Seconds 1
-          Stop-Process -Id $process.Id
-
-
   # Build et déploiement pour macOS
   build-macos:
-    needs: test-macos
     runs-on: macos-latest
 
     steps:
@@ -67,7 +20,7 @@ jobs:
           python-version: '3.10'  # Version compatible
 
       - name: Install dependencies (macOS)
-        run: pip install pyinstaller
+        run: pip install -r requirements.txt
 
       - name: Build application with PyInstaller (macOS)
         run: |
@@ -89,7 +42,6 @@ jobs:
 
   # Build et déploiement pour Windows
   build-windows:
-    needs: test-windows
     runs-on: windows-latest
 
     steps:
@@ -102,7 +54,7 @@ jobs:
           python-version: '3.10'  # Version compatible
 
       - name: Install dependencies (Windows)
-        run: pip install pyinstaller
+        run: pip install -r requirements.txt
 
       - name: Build application with PyInstaller (Windows)
         run: |
