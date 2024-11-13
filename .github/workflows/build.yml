@@ -34,7 +34,7 @@ jobs:
       - name: Upload artifact to GitHub Release (macOS)
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           tag: ${{ github.ref }}
           name: "Build for macOS"
           artifacts: "app_macos.zip"
@@ -65,10 +65,10 @@ jobs:
         run: |
           Compress-Archive -Path dist\* -DestinationPath app_windows.zip
 
-      - name: Upload artifact to GitHub Release (Windows)
+      - name: Upload artifact to GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           tag: ${{ github.ref }}
           name: "Build for Windows"
           artifacts: "app_windows.zip"
