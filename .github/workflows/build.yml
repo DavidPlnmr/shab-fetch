@@ -38,7 +38,7 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
-          name: "Build for macOS"
+          name: "Build"
           artifacts: "app_macos.zip"
           allowUpdates: true
 
@@ -72,6 +72,6 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
-          name: "Build for Windows"
+          name: "Build"
           artifacts: "app_windows.zip"
           allowUpdates: true
