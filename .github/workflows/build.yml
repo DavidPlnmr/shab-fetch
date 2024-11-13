@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  # Vérification de l'application sur macOS
+  # Test de l'application sur macOS
   test-macos:
     runs-on: macos-latest
 
@@ -17,15 +17,18 @@ jobs:
       - name: Set up Python for macOS
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Assurez-vous de choisir une version compatible avec PyQt5
+          python-version: '3.10'
 
       - name: Install dependencies (macOS)
         run: pip install -r requirements.txt
 
       - name: Test application (macOS)
-        run: python app.py
+        run: |
+          python app.py &
+          sleep 1
+          pkill -f "python app.py"
 
-  # Vérification de l'application sur Windows
+  # Test de l'application sur Windows
   test-windows:
     runs-on: windows-latest
 
@@ -36,13 +39,18 @@ jobs:
       - name: Set up Python for Windows
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Assurez-vous de choisir une version compatible avec PyQt5
+          python-version: '3.10'
 
       - name: Install dependencies (Windows)
         run: pip install -r requirements.txt
 
       - name: Test application (Windows)
-        run: python app.py
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "python.exe" -ArgumentList "app.py" -PassThru
+          Start-Sleep -Seconds 1
+          Stop-Process -Id $process.Id
+
 
   # Build et déploiement pour macOS
   build-macos:
@@ -63,7 +71,7 @@ jobs:
 
       - name: Build application with PyInstaller (macOS)
         run: |
-          pyinstaller --onedir --windowed --optimize=2 app.py
+          pyinstaller --onedir --windowed app.py
 
       - name: Archive build directory (macOS)
         if: success()
@@ -98,7 +106,7 @@ jobs:
 
       - name: Build application with PyInstaller (Windows)
         run: |
-          pyinstaller --onedir --windowed --optimize=2 app.py
+          pyinstaller --onedir --windowed app.py
 
       - name: Archive build directory (Windows)
         if: success()
