@@ -1,0 +1,70 @@
+name: Build Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-application:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Remplacez par la version Python requise
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Test application
+        run: python app.py
+        shell: bash
+
+  build-and-deploy:
+    needs: test-application
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Build application with PyInstaller
+        run: |
+          pyinstaller --onedir --windowed --optimize=2 app.py
+        shell: bash
+
+      - name: Archive build directory
+        if: success()
+        run: |
+          zip -r app_${{ matrix.os }}.zip dist/
+        shell: bash
+
+      - name: Upload artifact to GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          name: "Build for ${{ matrix.os }}"
+          artifacts: "app_${{ matrix.os }}.zip"
+          allowUpdates: true
+
+          
