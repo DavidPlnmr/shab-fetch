@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - '*'
 
 jobs:
   # Build et déploiement pour macOS
@@ -35,7 +37,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
           name: "Build for macOS"
           artifacts: "app_macos.zip"
           allowUpdates: true
@@ -65,11 +67,11 @@ jobs:
         run: |
           Compress-Archive -Path dist\* -DestinationPath app_windows.zip
 
-      - name: Upload artifact to GitHub Release
+      - name: Upload artifact to GitHub Release (Windows)
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
           name: "Build for Windows"
           artifacts: "app_windows.zip"
           allowUpdates: true
