@@ -6,64 +6,110 @@ on:
       - main
 
 jobs:
-  test-application:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
+  # Vérification de l'application sur macOS
+  test-macos:
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python for macOS
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'  # Remplacez par la version Python requise
+          python-version: '3.10'  # Assurez-vous de choisir une version compatible avec PyQt5
 
-      - name: Install dependencies
+      - name: Install dependencies (macOS)
         run: pip install -r requirements.txt
 
-      - name: Test application
+      - name: Test application (macOS)
         run: python app.py
-        shell: bash
 
-  build-and-deploy:
-    needs: test-application
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
+  # Vérification de l'application sur Windows
+  test-windows:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python for Windows
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'  # Assurez-vous de choisir une version compatible avec PyQt5
 
-      - name: Install dependencies
+      - name: Install dependencies (Windows)
+        run: pip install -r requirements.txt
+
+      - name: Test application (Windows)
+        run: python app.py
+
+  # Build et déploiement pour macOS
+  build-macos:
+    needs: test-macos
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python for macOS Build
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Version compatible
+
+      - name: Install dependencies (macOS)
         run: pip install pyinstaller
 
-      - name: Build application with PyInstaller
+      - name: Build application with PyInstaller (macOS)
         run: |
           pyinstaller --onedir --windowed --optimize=2 app.py
-        shell: bash
 
-      - name: Archive build directory
+      - name: Archive build directory (macOS)
         if: success()
         run: |
-          zip -r app_${{ matrix.os }}.zip dist/
-        shell: bash
+          zip -r app_macos.zip dist/
 
-      - name: Upload artifact to GitHub Release
+      - name: Upload artifact to GitHub Release (macOS)
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          name: "Build for ${{ matrix.os }}"
-          artifacts: "app_${{ matrix.os }}.zip"
+          name: "Build for macOS"
+          artifacts: "app_macos.zip"
           allowUpdates: true
 
+  # Build et déploiement pour Windows
+  build-windows:
+    needs: test-windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python for Windows Build
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Version compatible
+
+      - name: Install dependencies (Windows)
+        run: pip install pyinstaller
+
+      - name: Build application with PyInstaller (Windows)
+        run: |
+          pyinstaller --onedir --windowed --optimize=2 app.py
+
+      - name: Archive build directory (Windows)
+        if: success()
+        run: |
+          Compress-Archive -Path dist\* -DestinationPath app_windows.zip
+
+      - name: Upload artifact to GitHub Release (Windows)
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          name: "Build for Windows"
+          artifacts: "app_windows.zip"
+          allowUpdates: true
