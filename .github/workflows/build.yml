@@ -16,7 +16,7 @@ jobs:
       matrix:
         arch: [intel, arm]
 
-    runs-on: ${{ matrix.arch == 'intel' && 'macos-13' || 'macos-latest' }}
+    runs-on: ${{ matrix.arch == 'intel' && 'macos-15-intel' || 'macos-latest' }}
 
     steps:
       - name: Checkout repository
