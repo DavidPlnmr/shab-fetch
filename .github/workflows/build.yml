@@ -2,10 +2,11 @@ name: Build Application
 
 on:
   push:
-    branches:
-      - main
     tags:
       - '*'
+
+permissions:
+  contents: write
 
 jobs:
   # =========================
@@ -31,20 +32,17 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build application with PyInstaller (macOS)
-        run: |
-          pyinstaller --onedir --windowed app.py
+        run: pyinstaller --onedir --windowed app.py
 
       - name: Archive build directory (macOS)
-        run: |
-          zip -r app_macos_${{ matrix.arch }}.zip dist/
+        run: zip -r app_macos_${{ matrix.arch }}.zip dist/
 
       - name: Upload artifact to GitHub Release (macOS)
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
-          name: "Build"
-          artifacts: "app_macos_${{ matrix.arch }}.zip"
+          artifacts: app_macos_${{ matrix.arch }}.zip
           allowUpdates: true
 
   # =========================
@@ -54,30 +52,22 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python (Windows)
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies (Windows)
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-      - name: Build application with PyInstaller (Windows)
-        run: |
-          pyinstaller --onedir --windowed app.py
+      - run: pyinstaller --onedir --windowed app.py
 
-      - name: Archive build directory (Windows)
-        run: |
-          Compress-Archive -Path dist\* -DestinationPath app_windows.zip
+      - run: Compress-Archive -Path dist\* -DestinationPath app_windows.zip
 
       - name: Upload artifact to GitHub Release (Windows)
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
-          name: "Build"
-          artifacts: "app_windows.zip"
+          artifacts: app_windows.zip
           allowUpdates: true
