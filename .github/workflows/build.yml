@@ -34,7 +34,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build application with PyInstaller (macOS)
-        run: pyinstaller --onedir --windowed app.py
+        run: pyinstaller app.spec
 
       - name: Archive build directory (macOS)
         run: zip -r app_macos_${{ matrix.arch }}.zip dist/
@@ -62,7 +62,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: pyinstaller --onedir --windowed app.py
+      - run: pyinstaller app.spec
 
       - run: Compress-Archive -Path dist\* -DestinationPath app_windows.zip
 

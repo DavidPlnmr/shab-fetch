@@ -7,6 +7,17 @@ from shab_request_api import SHABRequestAPI
 import pandas as pd
 
 
+def get_resource_path(relative_path):
+    """Obtenir le chemin absolu d'une ressource, compatible avec PyInstaller"""
+    try:
+        # PyInstaller crée un dossier temp et stocke le chemin dans _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
+
+
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -62,7 +73,7 @@ class Window(QMainWindow):
             
             # Ajouter le logo
             logo_label = QLabel()
-            logo_path = os.path.join("canton_logos", f"{canton}.png")
+            logo_path = get_resource_path(os.path.join("canton_logos", f"{canton}.png"))
             if os.path.exists(logo_path):
                 pixmap = QPixmap(logo_path)
                 # Redimensionner le logo à 20x20 pixels
