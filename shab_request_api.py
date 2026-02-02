@@ -6,19 +6,26 @@ class SHABRequestAPI:
     def __init__(self):
         self.base_url = """https://www.shab.ch/api/v1/"""
 
-    def get_publications(self, size=1000, publication_date_start="2024-10-31", publication_date_end="2024-11-06", hr=False):
+    def get_publications(self, size=1000, publication_date_start="2024-10-31", publication_date_end="2024-11-06", hr=False, list_cantons=None):
         url = self.base_url + "publications"
-        url += f"?allowRubricSelection=true&cantons=GE&includeContent=true&pageRequest.page=0&pageRequest.size={size}&publicationStates=PUBLISHED&publicationStates=CANCELLED&publicationDate.end={publication_date_end}&publicationDate.start={publication_date_start}"
+        
+        # Gestion de la liste des cantons
+        if list_cantons is None or len(list_cantons) == 0:
+            cantons_param = "GE"  # Canton par défaut
+        else:
+            cantons_param = ",".join(list_cantons)
+        
+        url += f"?allowRubricSelection=true&cantons={cantons_param}&includeContent=true&pageRequest.page=0&pageRequest.size={size}&publicationStates=PUBLISHED&publicationStates=CANCELLED&publicationDate.end={publication_date_end}&publicationDate.start={publication_date_start}"
         if hr:
             url += "&subRubrics=HR01"
 
         response = requests.get(url)
         return response.json()["content"]
 
-    def get_new_entries(self, size=1000, publication_date_start="2024-10-31", publication_date_end="2024-11-06"):
+    def get_new_entries(self, size=1000, publication_date_start="2024-10-31", publication_date_end="2024-11-06", list_cantons=None):
         # https://www.shab.ch/api/v1/publications?allowRubricSelection=true&cantons=GE&includeContent=false&pageRequest.page=0&pageRequest.size=1000&publicationDate.end=2024-11-12&publicationDate.start=2024-11-06&publicationStates=PUBLISHED&publicationStates=CANCELLED&subRubrics=HR01
 
-        return self.get_publications(size=size, publication_date_start=publication_date_start, publication_date_end=publication_date_end, hr=True)
+        return self.get_publications(size=size, publication_date_start=publication_date_start, publication_date_end=publication_date_end, hr=True, list_cantons=list_cantons)
 
     def publications_data_to_df(self, data):
         # Extraction des données pour construire le DataFrame
