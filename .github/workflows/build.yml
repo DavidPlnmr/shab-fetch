@@ -7,71 +7,69 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
-  # Build et déploiement pour macOS
+  # =========================
+  # macOS (Intel + Apple Silicon)
+  # =========================
   build-macos:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [intel, arm]
+
+    runs-on: ${{ matrix.arch == 'intel' && 'macos-15-intel' || 'macos-latest' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python for macOS Build
+      - name: Set up Python (macOS)
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Version compatible
+          python-version: '3.10'
 
       - name: Install dependencies (macOS)
         run: pip install -r requirements.txt
 
       - name: Build application with PyInstaller (macOS)
-        run: |
-          pyinstaller --onedir --windowed app.py
+        run: pyinstaller --onedir --windowed app.py
 
       - name: Archive build directory (macOS)
-        if: success()
-        run: |
-          zip -r app_macos.zip dist/
+        run: zip -r app_macos_${{ matrix.arch }}.zip dist/
 
       - name: Upload artifact to GitHub Release (macOS)
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
-          name: "Build"
-          artifacts: "app_macos.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          artifacts: app_macos_${{ matrix.arch }}.zip
           allowUpdates: true
 
-  # Build et déploiement pour Windows
+  # =========================
+  # Windows
+  # =========================
   build-windows:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python for Windows Build
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Version compatible
+          python-version: '3.10'
 
-      - name: Install dependencies (Windows)
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-      - name: Build application with PyInstaller (Windows)
-        run: |
-          pyinstaller --onedir --windowed app.py
+      - run: pyinstaller --onedir --windowed app.py
 
-      - name: Archive build directory (Windows)
-        if: success()
-        run: |
-          Compress-Archive -Path dist\* -DestinationPath app_windows.zip
+      - run: Compress-Archive -Path dist\* -DestinationPath app_windows.zip
 
       - name: Upload artifact to GitHub Release (Windows)
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          tag: ${{ github.ref_name }}  # Utilise uniquement le nom du tag
-          name: "Build"
-          artifacts: "app_windows.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          artifacts: app_windows.zip
           allowUpdates: true
